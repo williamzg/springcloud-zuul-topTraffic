@@ -1,0 +1,98 @@
+spring:
+  application:
+    name: springcloud-zuul-cas
+  cloud: 
+    loadbalancer: 
+      retry: 
+        enabled: true
+  #redis配置
+  redis:
+    host: 192.168.32.59
+    port: 6379
+    password: 123456
+    database: 0
+    timeout: 0
+    pool:
+      # 连接池最大连接数（使用负值表示没有限制）
+        max-active: 8
+      # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-wait: -1 
+      # 连接池中的最大空闲连接
+        max-idle: 8
+      # 连接池中的最小空闲连接
+        min-idle: 0
+  #替换默认ico
+  mvc:
+    favicon:
+      enabled: false
+
+#微服务端口号
+server:
+  port: 8888
+
+zuul:
+  #重试必配，据说在Brixton.SR5版的spring cloud中该配置默认是true，结果在Dalston.SR1中看到的是false
+  retryable: true
+  #路由代理配置
+  routes:
+    portal:
+      path: /portal/**
+      url: http://192.168.32.59:9010/DataMiningPortal/
+      stripPrefix: true
+    userManager: 
+      path: /userManager/**
+      url: http://192.168.32.59:9010/UserManager/
+      stripPrefix: true
+
+#服务注册中心
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://192.168.100.183:8761/eureka/
+
+
+
+#CAS配置
+security:
+  cas:
+    server:
+      host: http://192.168.100.132:9010/cas
+      login: ${security.cas.server.host}/login?loginFrom=DWMS
+      logout: ${security.cas.server.host}/logout
+    service:
+      host: http://127.0.0.1:8888
+      login: /login/cas
+      logout: /logout
+      welcomeurl: /portal/index.html
+
+# 重试机制
+hystrix: 
+  command: 
+    default: 
+      execution: 
+        isolation: 
+          thread: 
+            timeoutInMilliseconds: 10000
+
+compute-service: 
+  ribbon: 
+    ConnectTimeout: 250
+    ReadTimeout: 1000
+
+# 对所有操作请求都进行重试
+    OkToRetryOnAllOperations: true
+
+# 切换实例的重试次数
+    MaxAutoRetriesNextServer: 2
+
+# 对当前实例的重试次数
+    MaxAutoRetries: 1
+
+#自定义配置
+geostar:
+#权限模式(strict:严格模式，未配置或未授权的菜单均无法访问，loose:宽松模式,菜单配置在权限系统中且未授权时无法访问)
+  authoritymode: loose
+#不经过权限检查的链接后缀
+  excludedpagestr: .js,.gif,.jpg,.png,.css,.ico,.json
+  nocaszuul: 192.168.100.183:8888
+  nocasurl: /soe/**,/arcgis/**
