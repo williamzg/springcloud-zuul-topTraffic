@@ -1,14 +1,13 @@
-package com.wlb.forever.toptraffic.repository;
+package com.wlb.forever.toptraffic.service.impl;
 
 import com.wlb.forever.toptraffic.domain.VisitMonitor;
 import com.wlb.forever.util.RedisUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 
-
-public class RedisTopTrafficRepository extends AbstractTopTrafficRepository {
+public class RedisTopTrafficServiceImpl extends AbstractTopTrafficServiceImpl {
     private RedisUtil redisUtil;
 
-    public RedisTopTrafficRepository(RedisTemplate<String, Object> redisTemplate) {
+    public RedisTopTrafficServiceImpl(RedisTemplate<String, Object> redisTemplate) {
         this.redisUtil = new RedisUtil(redisTemplate);
     }
 

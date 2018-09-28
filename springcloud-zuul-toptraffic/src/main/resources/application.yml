@@ -1,10 +1,23 @@
 spring:
   application:
     name: springcloud-zuul-toptraffic
+
   cloud: 
     loadbalancer: 
       retry: 
         enabled: true
+
+  datasource:
+    url: jdbc:oracle:thin:@192.168.100.132:1521:orcl
+    username: datamining
+    password: datamining
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+    testOnBorrow: true
+    validationQuery: SELECT 1 FROM DUAL
+
+  jpa:
+    show-sql: true
+
   #redis配置
   redis:
     host: 192.168.32.59
@@ -21,10 +34,7 @@ spring:
         max-idle: 8
       # 连接池中的最小空闲连接
         min-idle: 0
-  #替换默认ico
-  mvc:
-    favicon:
-      enabled: false
+
 
   #时间戳统一转换
   jackson:
@@ -79,5 +89,5 @@ compute-service:
     MaxAutoRetries: 1
 wlb:
   toptraffic:
-    repository: REDIS
+    service: REDIS
 

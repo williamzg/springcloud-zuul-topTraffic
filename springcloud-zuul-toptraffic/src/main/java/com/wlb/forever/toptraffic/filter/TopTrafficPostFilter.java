@@ -1,11 +1,10 @@
 package com.wlb.forever.toptraffic.filter;
 
 import com.netflix.zuul.context.RequestContext;
-import com.wlb.forever.toptraffic.repository.TopTrafficRepository;
+import com.wlb.forever.toptraffic.service.TopTrafficService;
 import com.wlb.forever.toptraffic.domain.VisitMonitor;
 import com.wlb.forever.toptraffic.support.TopTrafficConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,17 +13,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.UUID;
 
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.POST_TYPE;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.SEND_RESPONSE_FILTER_ORDER;
 
+@Slf4j
 public class TopTrafficPostFilter extends AbstractTopTrafficFilter {
-    private Logger logger =LoggerFactory.getLogger(TopTrafficPostFilter.class);
-    
-    private final TopTrafficRepository topTrafficRepository;
 
-    public TopTrafficPostFilter(TopTrafficRepository topTrafficRepository){
-        this.topTrafficRepository=topTrafficRepository;
+    private final TopTrafficService topTrafficService;
+
+    public TopTrafficPostFilter(TopTrafficService topTrafficService) {
+        this.topTrafficService = topTrafficService;
     }
 
     @Override
@@ -46,51 +46,53 @@ public class TopTrafficPostFilter extends AbstractTopTrafficFilter {
     public Object run() {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
-        int requestTraffic=getResponseDataStreamSize();
-        String requestIp=getIpAddr(request);
-        String requestUrl=getRequestAddr(request);
+        int requestTraffic = getResponseDataStreamSize();
+        String requestIp = getIpAddr(request);
+        String requestUrl = getRequestAddr(request);
         Long timeConsum = System.currentTimeMillis() - getRequestStartTime();
-        VisitMonitor visitMonitor=new VisitMonitor();
+        VisitMonitor visitMonitor = new VisitMonitor();
+        visitMonitor.setId(UUID.randomUUID().toString());
         visitMonitor.setRequestIp(requestIp);
         visitMonitor.setRequestTraffic(requestTraffic);
         visitMonitor.setRequestUrl(requestUrl);
         visitMonitor.setResponseCode(ctx.getResponseStatusCode());
         visitMonitor.setResponseData(null);
         visitMonitor.setTimeConsum(timeConsum);
-        Date date=new Date();
+        Date date = new Date();
         visitMonitor.setVisitTime(date);
-        topTrafficRepository.saveVisitMonitor(visitMonitor);
+        topTrafficService.saveVisitMonitor(visitMonitor);
         return null;
     }
 
     /**
-     *获取返回数据流量
+     * 获取返回数据流量
+     *
      * @return
      */
-    private int getResponseDataStreamSize(){
+    private int getResponseDataStreamSize() {
         final RequestContext ctx = RequestContext.getCurrentContext();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int responseDataStreamSize=0;
+        int responseDataStreamSize = 0;
         try {
             InputStream is = ctx.getResponseDataStream();
-            if(null==is){
+            if (null == is) {
                 return responseDataStreamSize;
             }
             baos = cloneInputStream(is);
-            responseDataStreamSize=baos.size();
+            responseDataStreamSize = baos.size();
             final InputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
             ctx.setResponseDataStream(inputStream);
             baos.close();
             return responseDataStreamSize;
         } catch (Exception e) {
-            logger.error("获取数据流量大小出现异常!");
+            log.error("获取数据流量大小出现异常!");
             return responseDataStreamSize;
         } finally {
             if (baos != null) {
                 try {
                     baos.close();
                 } catch (IOException e) {
-                    logger.error("ByteArrayOutputStream关闭失败!");
+                    log.error("ByteArrayOutputStream关闭失败!");
                     return responseDataStreamSize;
                 }
             }
@@ -99,6 +101,7 @@ public class TopTrafficPostFilter extends AbstractTopTrafficFilter {
 
     /**
      * 获取请求开始时间
+     *
      * @return
      */
     private Long getRequestStartTime() {
@@ -114,7 +117,7 @@ public class TopTrafficPostFilter extends AbstractTopTrafficFilter {
      * @return
      */
     private ByteArrayOutputStream cloneInputStream(InputStream input) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             byte[] buffer = new byte[1024];
             int len;
@@ -126,7 +129,7 @@ public class TopTrafficPostFilter extends AbstractTopTrafficFilter {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
-        }finally {
+        } finally {
             try {
                 baos.close();
             } catch (IOException e) {
@@ -138,6 +141,7 @@ public class TopTrafficPostFilter extends AbstractTopTrafficFilter {
 
     /**
      * 获取访问请求ip
+     *
      * @param request
      * @return
      */
@@ -157,10 +161,11 @@ public class TopTrafficPostFilter extends AbstractTopTrafficFilter {
 
     /**
      * 获取请求URL
+     *
      * @param request
      * @return
      */
-    private String getRequestAddr(HttpServletRequest request){
+    private String getRequestAddr(HttpServletRequest request) {
         String requestPath = request.getRequestURL().toString();
         String queryString = request.getQueryString();
         if (queryString != null) {
