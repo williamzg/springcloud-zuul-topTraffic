@@ -42,37 +42,11 @@
 			<groupId>org.springframework.retry</groupId>
 			<artifactId>spring-retry</artifactId>
 		</dependency>
-		
-		<!-- feign -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-feign</artifactId>
-		</dependency>
 
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>compile</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>false</optional>
-		</dependency>
-		<!-- security starter Poms -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<!-- security 对CAS支持 -->
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-cas</artifactId>
-		</dependency>
-		<!-- security taglibs -->
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-taglibs</artifactId>
 		</dependency>
 		<!-- 热加载 -->
 		<dependency>
@@ -98,17 +72,6 @@
             <version>2.2.3</version>
             <classifier>jdk15</classifier>
         </dependency>
-        <!-- 自定义工具类 -->
-        <dependency>
-            <groupId>com.geostar.gtgh</groupId>
-            <artifactId>DataCenter-util</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-       <!--  <dependency>  
-            <groupId>org.springframework.session</groupId>  
-            <artifactId>spring-session-data-redis</artifactId>  
-        </dependency>  -->
 	</dependencies>
 
 	<!-- 引入spring cloud的依赖 -->

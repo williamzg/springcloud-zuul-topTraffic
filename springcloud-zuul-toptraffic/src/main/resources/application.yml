@@ -1,6 +1,6 @@
 spring:
   application:
-    name: springcloud-zuul-cas
+    name: springcloud-zuul-toptraffic
   cloud: 
     loadbalancer: 
       retry: 
@@ -26,6 +26,11 @@ spring:
     favicon:
       enabled: false
 
+  #时间戳统一转换
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
 #微服务端口号
 server:
   port: 8888
@@ -39,7 +44,7 @@ zuul:
       path: /portal/**
       url: http://192.168.32.59:9010/DataMiningPortal/
       stripPrefix: true
-    userManager: 
+    userManager:
       path: /userManager/**
       url: http://192.168.32.59:9010/UserManager/
       stripPrefix: true
@@ -49,21 +54,6 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://192.168.100.183:8761/eureka/
-
-
-
-#CAS配置
-security:
-  cas:
-    server:
-      host: http://192.168.100.132:9010/cas
-      login: ${security.cas.server.host}/login?loginFrom=DWMS
-      logout: ${security.cas.server.host}/logout
-    service:
-      host: http://127.0.0.1:8888
-      login: /login/cas
-      logout: /logout
-      welcomeurl: /portal/index.html
 
 # 重试机制
 hystrix: 
@@ -87,12 +77,7 @@ compute-service:
 
 # 对当前实例的重试次数
     MaxAutoRetries: 1
+wlb:
+  toptraffic:
+    repository: REDIS
 
-#自定义配置
-geostar:
-#权限模式(strict:严格模式，未配置或未授权的菜单均无法访问，loose:宽松模式,菜单配置在权限系统中且未授权时无法访问)
-  authoritymode: loose
-#不经过权限检查的链接后缀
-  excludedpagestr: .js,.gif,.jpg,.png,.css,.ico,.json
-  nocaszuul: 192.168.100.183:8888
-  nocasurl: /soe/**,/arcgis/**

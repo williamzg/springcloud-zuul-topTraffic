@@ -1,11 +1,11 @@
 package com.wlb.forever.toptraffic.filter;
 
-import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
+import com.wlb.forever.toptraffic.repository.TopTrafficRepository;
 import com.wlb.forever.toptraffic.domain.VisitMonitor;
 import com.wlb.forever.toptraffic.support.TopTrafficConstants;
-import com.wlb.forever.util.RedisUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,10 +18,14 @@ import java.util.Date;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.POST_TYPE;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.SEND_RESPONSE_FILTER_ORDER;
 
-public class TopTrafficPostFilter extends ZuulFilter {
+public class TopTrafficPostFilter extends AbstractTopTrafficFilter {
+    private Logger logger =LoggerFactory.getLogger(TopTrafficPostFilter.class);
     
-    @Autowired
-    private RedisUtil redisUtil;
+    private final TopTrafficRepository topTrafficRepository;
+
+    public TopTrafficPostFilter(TopTrafficRepository topTrafficRepository){
+        this.topTrafficRepository=topTrafficRepository;
+    }
 
     @Override
     public String filterType() {
@@ -55,7 +59,7 @@ public class TopTrafficPostFilter extends ZuulFilter {
         visitMonitor.setTimeConsum(timeConsum);
         Date date=new Date();
         visitMonitor.setVisitTime(date);
-        redisUtil.lSet("visitlog",visitMonitor);
+        topTrafficRepository.saveVisitMonitor(visitMonitor);
         return null;
     }
 
@@ -69,6 +73,9 @@ public class TopTrafficPostFilter extends ZuulFilter {
         int responseDataStreamSize=0;
         try {
             InputStream is = ctx.getResponseDataStream();
+            if(null==is){
+                return responseDataStreamSize;
+            }
             baos = cloneInputStream(is);
             responseDataStreamSize=baos.size();
             final InputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
@@ -76,14 +83,14 @@ public class TopTrafficPostFilter extends ZuulFilter {
             baos.close();
             return responseDataStreamSize;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("获取数据流量大小出现异常!");
             return responseDataStreamSize;
         } finally {
             if (baos != null) {
                 try {
                     baos.close();
                 } catch (IOException e) {
-                    System.out.println("ByteArrayOutputStream关闭失败!");
+                    logger.error("ByteArrayOutputStream关闭失败!");
                     return responseDataStreamSize;
                 }
             }

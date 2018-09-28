@@ -1,6 +1,5 @@
 package com.wlb.forever.toptraffic.filter;
 
-import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.wlb.forever.toptraffic.support.TopTrafficConstants;
 
@@ -10,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_DECORATION_FILTER_ORDER;
 
-public class TopTrafficPreFilter extends ZuulFilter {
+public class TopTrafficPreFilter extends AbstractTopTrafficFilter {
     @Override
     public String filterType() {
         return PRE_TYPE;
